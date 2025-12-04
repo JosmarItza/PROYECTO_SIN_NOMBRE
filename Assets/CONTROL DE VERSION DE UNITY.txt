@@ -1,0 +1,11 @@
+PARA BAJAR LA VERSION MAS RECIENTE DEL PROYECTO:
+-> git pull
+
+PARA AGREGAR TODOS LOS CAMBIOS:
+-> git add .
+
+PARA AGREGAR MENSAJE:
+-> git commit -m "Descripción de lo que cambiaste"
+
+PARA ENVIAR LOS CAMBIOS AL REPOSITORIO
+-> git push
