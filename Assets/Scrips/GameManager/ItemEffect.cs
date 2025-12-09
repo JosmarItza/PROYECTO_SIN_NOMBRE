@@ -20,7 +20,11 @@ public class ItemEffect : MonoBehaviour
     public float fadeOutTime = 0.3f;
 
     [Header("Curación")]
-    public int healAmount = 1; // 🔥 CUÁNTOS PUNTOS DE VIDA AGREGA
+    public int healAmount = 1;
+    
+    [Header("Sonido")]
+    public AudioClip pickSound;
+    public AudioSource audioSource;
 
     private bool triggered = false;
     private Animator anim;
@@ -42,6 +46,13 @@ public class ItemEffect : MonoBehaviour
             if (hp != null)
             {
                 hp.Heal(healAmount);
+            }
+            if (pickSound != null)
+            {
+                if (audioSource != null)
+                    audioSource.PlayOneShot(pickSound);
+                else
+                    AudioSource.PlayClipAtPoint(pickSound, transform.position);
             }
         }
     

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 public class PatrullajeEnemigo : MonoBehaviour
 {
     [Header("Puntos de Patrulla")]
@@ -11,6 +12,11 @@ public class PatrullajeEnemigo : MonoBehaviour
     public float velocidad = 2f;
     public float tiempoEspera = 1f;
 
+    [Header("Sonidos")]
+    public AudioClip sonidoCaminar;   // Sonido mientras camina (loop)
+    public AudioClip sonidoDetener;   // Sonido al llegar y detenerse
+    private AudioSource audioSource;
+
     private Transform objetivoActual;
     private Animator animator;
 
@@ -20,8 +26,12 @@ public class PatrullajeEnemigo : MonoBehaviour
     {
         objetivoActual = puntoA;
 
-        // Buscar Animator aunque esté en un hijo
+        // Animator en hijos
         animator = GetComponentInChildren<Animator>();
+
+        // AudioSource en este mismo objeto
+        audioSource = GetComponent<AudioSource>();
+        audioSource.loop = false;
     }
 
     void Update()
@@ -32,41 +42,55 @@ public class PatrullajeEnemigo : MonoBehaviour
 
     void Patrullar()
     {
-        // Activar animación de caminar
         animator.SetBool("isMoving", true);
 
-        // Movimiento hacia punto
+        // 🔊 REPRODUCIR sonido caminar solo si no está ya sonando
+        if (!audioSource.isPlaying)
+        {
+            audioSource.clip = sonidoCaminar;
+            audioSource.loop = true;
+            audioSource.Play();
+        }
+
+        // Movimiento
         transform.position = Vector2.MoveTowards(
             transform.position,
             objetivoActual.position,
             velocidad * Time.deltaTime
         );
 
-        // Si llegó
+        // Llegó al punto
         if (Vector2.Distance(transform.position, objetivoActual.position) < 0.05f)
         {
             StartCoroutine(EsperarYGirar());
         }
     }
 
-    private System.Collections.IEnumerator EsperarYGirar()
+    private IEnumerator EsperarYGirar()
     {
         esperando = true;
 
-        // Activar animación Idle
+        // Apagar animación caminar
         animator.SetBool("isMoving", false);
 
-        // Esperar quieto
+        // 🔊 Parar sonido caminar
+        audioSource.Stop();
+
+        // 🔊 Reproducir sonido de detenerse
+        audioSource.loop = false;
+        audioSource.PlayOneShot(sonidoDetener);
+
+        // Esperar
         yield return new WaitForSeconds(tiempoEspera);
 
-        // 🔄 Girar por escala (no con flipX)
+        // Girar
         transform.localScale = new Vector3(
-            -transform.localScale.x, 
-            transform.localScale.y, 
+            -transform.localScale.x,
+            transform.localScale.y,
             transform.localScale.z
         );
 
-        // Cambiar punto de destino
+        // Cambiar objetivo
         objetivoActual = (objetivoActual == puntoA) ? puntoB : puntoA;
 
         esperando = false;

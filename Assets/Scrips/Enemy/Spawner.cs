@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-[Header("Prefab a spawnear")]
+    [Header("Prefab a spawnear")]
     public GameObject prefab;
 
     [Header("Puntos de movimiento")]
@@ -16,6 +16,11 @@ public class Spawner : MonoBehaviour
     public float moveSpeed = 3f;
 
     private float timer;
+
+    [Header("Sonido de Spawn")]
+    public AudioSource spawnSource;  // << Nuevo AudioSource
+    public AudioClip spawnClip;      // << Sonido al crear uno
+    public float spawnVolume = 1f;   // << Volumen
 
     void Update()
     {
@@ -32,6 +37,12 @@ public class Spawner : MonoBehaviour
     {
         // Crear objeto
         GameObject obj = Instantiate(prefab, pointA.position, Quaternion.identity);
+
+        // Reproducir sonido
+        if (spawnSource != null && spawnClip != null)
+        {
+            spawnSource.PlayOneShot(spawnClip, spawnVolume);
+        }
 
         // Añadir componente que lo mueve A→B
         MovingPiece movement = obj.AddComponent<MovingPiece>();

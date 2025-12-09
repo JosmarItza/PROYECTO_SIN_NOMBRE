@@ -29,6 +29,11 @@ public class BatEnemy : MonoBehaviour
     public float followCooldown = 0.3f;
     public float stopDistance = 0.5f;
 
+    [Header("Sonidos")]
+    public AudioSource audioSource;
+    public AudioClip idleSound;     
+    public AudioClip attackSound;
+
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -45,13 +50,15 @@ public class BatEnemy : MonoBehaviour
 
         SetRandomTarget();
         StartCoroutine(PatrolInsideZone());
+
+        
+        PlayIdleSound();
     }
 
     void Update()
     {
         if (player == null) return;
 
-        // Si el jugador está muerto, no hacer nada
         PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
         if (playerHealth != null && playerHealth.currentHealth <= 0)
         {
@@ -84,6 +91,7 @@ public class BatEnemy : MonoBehaviour
         if (!playerDetected && distance < detectionRange)
         {
             playerDetected = true;
+
             StopCoroutine(PatrolInsideZone());
             StartCoroutine(AttackThenMove());
         }
@@ -94,6 +102,9 @@ public class BatEnemy : MonoBehaviour
             moveSpeed = normalSpeed;
             SetRandomTarget();
             StartCoroutine(PatrolInsideZone());
+
+            
+            PlayIdleSound();
         }
     }
 
@@ -102,8 +113,10 @@ public class BatEnemy : MonoBehaviour
         while (!playerDetected)
         {
             MoveTowards(targetPosition);
+
             if (Vector2.Distance(transform.position, targetPosition) < 0.1f)
                 SetRandomTarget();
+
             yield return null;
         }
     }
@@ -122,19 +135,27 @@ public class BatEnemy : MonoBehaviour
 
     IEnumerator AttackThenMove()
     {
-        // Verificamos vida antes de atacar
         PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
+
         if (playerHealth != null && playerHealth.currentHealth <= 0)
             yield break;
 
         anim.SetBool("attack", true);
         anim.SetBool("isMoving", false);
+
+        
+        PlayAttackSound();
+
         yield return new WaitForSeconds(attackDelay);
+
         anim.SetBool("attack", false);
         anim.SetBool("isMoving", true);
 
         moveSpeed += 2f;
         isFollowingPlayer = true;
+
+        
+        PlayIdleSound();
     }
 
     IEnumerator FollowCooldown()
@@ -149,19 +170,45 @@ public class BatEnemy : MonoBehaviour
         if (playerDetected) return;
 
         float dir = targetPosition.x - transform.position.x;
+
         if (dir > 0 && transform.localScale.x < 0)
-            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            transform.localScale = new Vector3(1, 1, 1);
         else if (dir < 0 && transform.localScale.x > 0)
-            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            transform.localScale = new Vector3(-1, 1, 1);
     }
 
     void FlipTowardsPlayerDirect()
     {
         float dir = player.position.x - transform.position.x;
+
         if (dir > 0 && transform.localScale.x < 0)
-            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            transform.localScale = new Vector3(1, 1, 1);
         else if (dir < 0 && transform.localScale.x > 0)
-            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            transform.localScale = new Vector3(-1, 1, 1);
+    }
+
+    
+    
+    
+
+    void PlayIdleSound()
+    {
+        if (audioSource == null || idleSound == null) return;
+
+        audioSource.loop = true;
+        audioSource.clip = idleSound;
+
+        if (!audioSource.isPlaying)
+            audioSource.Play();
+    }
+
+    void PlayAttackSound()
+    {
+        if (audioSource == null || attackSound == null) return;
+
+        audioSource.loop = false;
+        audioSource.Stop(); 
+        audioSource.PlayOneShot(attackSound);
     }
 
     void OnDrawGizmos()
@@ -170,12 +217,6 @@ public class BatEnemy : MonoBehaviour
         {
             Gizmos.color = Color.green;
             Gizmos.DrawWireCube(zoneCenter.transform.position, zoneSize);
-        }
-
-        if (player != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(transform.position, player.position);
         }
 
         Gizmos.color = new Color(0f, 0f, 1f, 0.3f);

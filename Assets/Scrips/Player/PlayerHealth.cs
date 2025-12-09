@@ -10,6 +10,11 @@ public class PlayerHealth : MonoBehaviour
     [HideInInspector]
     public int currentHealth;
 
+    [Header("Sonido de Daño")]
+    public AudioSource audioSource;   // Arrastra un AudioSource del jugador
+    public AudioClip damageClip;      // Sonido de daño
+    public float damageVolume = 1f;
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -19,6 +24,13 @@ public class PlayerHealth : MonoBehaviour
     {
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        // 🎧 Reproducir sonido de daño
+        if (audioSource != null && damageClip != null)
+        {
+            audioSource.PlayOneShot(damageClip, damageVolume);
+        }
+
         FindObjectOfType<UI>().ShakeHearts();
     }
 

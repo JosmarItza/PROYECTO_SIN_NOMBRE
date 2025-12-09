@@ -8,6 +8,18 @@ public class PlayerMovement : MonoBehaviour
     public float velocidad = 5f;
     private float movimiento;
 
+    [Header("Sonido de pasos")]
+    public AudioSource stepSource;     // AudioSource con loop
+    public AudioClip stepClip;         
+    public float stepVolume = 1f;
+    public float footstepFadeTime = 0.5f;
+    private Coroutine fadeCoroutine;
+
+    [Header("Sonido de Dash")]
+    public AudioSource dashSource;     // Nuevo AudioSource solo para el dash
+    public AudioClip dashClip;         // Sonido del dash
+    public float dashVolume = 1f;      // Volumen del dash
+
     [Header("Salto")]
     public float fuerzaSalto = 10f;
     public Transform groundCheck;
@@ -28,13 +40,13 @@ public class PlayerMovement : MonoBehaviour
 
     private float originalGravity;
 
-    private PlayerHealth playerHealth; // Referencia a la vida del jugador
+    private PlayerHealth playerHealth;
 
     [Header("Salto Variable")]
-    public float saltoInicial = 10f;       // Tu fuerza normal
-    public float saltoExtra = 20f;         // Fuerza extra mientras mantienes PRESIONADO Space
-    public float tiempoSaltoMax = 0.2f;    // Cuánto tiempo puede seguir aumentando
-    private float tiempoSalto;             // Timer interno
+    public float saltoInicial = 10f;
+    public float saltoExtra = 20f;
+    public float tiempoSaltoMax = 0.2f;
+    private float tiempoSalto;
     private bool saltando;
 
 
@@ -51,7 +63,8 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // Si la vida es 0, bloquear movimiento y animaciones
+        HandleFootsteps();
+
         if (playerHealth != null && playerHealth.currentHealth <= 0)
         {
             rb.velocity = Vector2.zero;
@@ -100,7 +113,6 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Bloquear movimiento si vida es 0
         if (playerHealth != null && playerHealth.currentHealth <= 0)
             return;
 
@@ -112,12 +124,18 @@ public class PlayerMovement : MonoBehaviour
 
     IEnumerator DoDash()
     {
-        // Bloquear dash si vida es 0
         if (playerHealth != null && playerHealth.currentHealth <= 0)
             yield break;
 
         isDashing = true;
         canDash = false;
+
+        // 🔊 <<< REPRODUCIR SONIDO DE DASH >>>
+        if (dashSource != null && dashClip != null)
+        {
+            dashSource.volume = dashVolume;
+            dashSource.PlayOneShot(dashClip);
+        }
 
         float direction = sr.flipX ? -1 : 1;
 
@@ -133,4 +151,52 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(dashCooldown);
         canDash = true;
     }
+
+    void HandleFootsteps()
+    {
+        bool shouldPlay =
+            movimiento != 0 &&
+            enSuelo &&
+            !isDashing &&
+            playerHealth.currentHealth > 0;
+
+        if (shouldPlay)
+        {
+            if (!stepSource.isPlaying)
+            {
+                if (fadeCoroutine != null)
+                    StopCoroutine(fadeCoroutine);
+
+                stepSource.volume = stepVolume; 
+                stepSource.clip = stepClip;
+                stepSource.Play();
+            }
+        }
+        else
+        {
+            if (stepSource.isPlaying && fadeCoroutine == null)
+            {
+                fadeCoroutine = StartCoroutine(FadeOutFootsteps());
+            }
+        }
+    }
+
+    IEnumerator FadeOutFootsteps()
+    {
+        float startVolume = stepSource.volume;
+        float elapsed = 0f;
+    
+        while (elapsed < footstepFadeTime)
+        {
+            float t = elapsed / footstepFadeTime;
+            stepSource.volume = Mathf.Lerp(startVolume, 0f, t);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+    
+        stepSource.volume = 0f;
+        stepSource.Stop();
+        fadeCoroutine = null;
+    }
+
 }

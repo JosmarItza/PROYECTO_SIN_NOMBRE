@@ -1,0 +1,18 @@
+-> SUBIR ARCHIVOS LOCALES
+git add .
+
+-> SUBIR CAMBIOS CON COMENTARIO
+git commit -m "Guardando mis cambios locales"
+
+-> BAJAR LA VERSIÓN MÁS RECIENTE DEL REPO
+git pull
+(NOTA: Si los cambios solo se guardaron localmente y no se subieron a Git, este comando traerá los cambios remotos)
+
+------ SI DESPUÉS DEL COMMIT SE ABRE EL EDITOR DE TEXTO VIM (VENTANA CON TEXTO EN AZUL) HACER LO SIGUIENTE ------
+
+-> SALIR DEL EDITOR VIM
+1. Presionar ESC
+2. Escribir :wq
+3. Presionar ENTER
+
+Esto completa el commit de merge y permite que Git continúe con el pull.
