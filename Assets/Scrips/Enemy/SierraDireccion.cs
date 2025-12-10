@@ -12,39 +12,50 @@ public class SierraDireccion : MonoBehaviour
     public float velocidad = 4f;
     public float tiempoEspera = 0f; // si la sierra NO debe parar, pon 0
 
+    [Header("Curva de Movimiento")]
+    public AnimationCurve curvaMovimiento = AnimationCurve.Linear(0, 0, 1, 1);
+
     private Transform objetivoActual;
     private bool esperando = false;
+    private float t = 0f; // parámetro de interpolación
+    private Vector3 inicioPos;
 
     void Start()
     {
         objetivoActual = puntoA;
+        inicioPos = transform.position;
     }
 
     void Update()
     {
         if (!esperando)
-            Mover();
+            MoverConCurva();
     }
 
-    void Mover()
+    void MoverConCurva()
     {
-        transform.position = Vector2.MoveTowards(
-            transform.position,
-            objetivoActual.position,
-            velocidad * Time.deltaTime
-        );
+        t += Time.deltaTime * velocidad;
 
-        if (Vector2.Distance(transform.position, objetivoActual.position) < 0.05f)
+        // Normalizamos t de 0 a 1 según la distancia
+        float distancia = Vector3.Distance(inicioPos, objetivoActual.position);
+        float tNormalizado = t / distancia;
+
+        // Aplicamos la curva
+        float tCurva = curvaMovimiento.Evaluate(Mathf.Clamp01(tNormalizado));
+
+        // Interpolamos posición
+        transform.position = Vector3.Lerp(inicioPos, objetivoActual.position, tCurva);
+
+        if (Vector3.Distance(transform.position, objetivoActual.position) < 0.05f)
         {
             StartCoroutine(EsperarYGirar());
         }
     }
 
-    private System.Collections.IEnumerator EsperarYGirar()
+    private IEnumerator EsperarYGirar()
     {
         esperando = true;
 
-        // Si quieres que se quede quieta unos segundos
         yield return new WaitForSeconds(tiempoEspera);
 
         // Girar por scale (opcional)
@@ -54,9 +65,12 @@ public class SierraDireccion : MonoBehaviour
             transform.localScale.z
         );
 
-        // Cambiar el punto al que va
+        // Cambiar punto
         objetivoActual = (objetivoActual == puntoA) ? puntoB : puntoA;
 
+        // Reiniciar interpolación
+        inicioPos = transform.position;
+        t = 0f;
         esperando = false;
     }
 

@@ -182,9 +182,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4297761368343604993, guid: b5c99aa634d515145959929039ed473b, type: 3}
       insertIndex: 1
-      addedObject: {fileID: 4087841486112390367}
-    - targetCorrespondingSourceObject: {fileID: 4297761368343604993, guid: b5c99aa634d515145959929039ed473b, type: 3}
-      insertIndex: 2
       addedObject: {fileID: 4015758242285064188}
     - targetCorrespondingSourceObject: {fileID: 4297761368343604993, guid: b5c99aa634d515145959929039ed473b, type: 3}
       insertIndex: -1
@@ -206,24 +203,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4297761368343604993, guid: b5c99aa634d515145959929039ed473b, type: 3}
   m_PrefabInstance: {fileID: 7071224571359479480}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4087841486112390367
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6451052947305474489}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a83de331cdba7dc4488a62c42f07b8ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  puntoA: {fileID: 3694873046456311637}
-  puntoB: {fileID: 7485935057518232283}
-  velocidad: 1.4
-  tiempoEspera: 1.5
-  sonidoCaminar: {fileID: 8300000, guid: 3f13b893d0baceb4bae97a86aec03636, type: 3}
-  sonidoDetener: {fileID: 8300000, guid: eccbccc52d7439245bf4c499e0798ad4, type: 3}
 --- !u!114 &4015758242285064188
 MonoBehaviour:
   m_ObjectHideFlags: 0
